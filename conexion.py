@@ -4,13 +4,7 @@
 
 public class Conexion {
     
-    public static final String url= "jdbc:mysql://localhost:3306/programacompleto?autoreconnect=true&useSSL=false";
-    public static final String user= "root";
-    public static final String pass= "1031";
-    
-    public Connection getConnection(){
-        
-        Connection con = null;
+   
         
         try {
             Class.forName("com.mysql.jdbc.Driver"); 
@@ -22,13 +16,8 @@ public class Conexion {
         
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Conexion.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Conexion.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
         
-        return null;
-       
-        
-    }
+    
     
 }
