@@ -1,0 +1,227 @@
+package modeloCliente;
+
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *
+ * @author braya
+ */
+public class Procesos extends Conexion {
+
+    Connection con = null;
+    PreparedStatement ps;
+    ResultSet rs;
+
+    public boolean insertarDatos(Cliente cliente) {
+
+        con = getConnection();
+
+        try {
+            ps = (PreparedStatement) con.prepareStatement("insert into cliente(nombreCliente, apellido, password, genero, telefono, correoE, estrato, edad, lugarResidencia, fechaRegistro, ciudad, localidad, idCategoria)values(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            ps.setString(1, cliente.getNombre());
+            ps.setString(2, cliente.getApellido());
+            ps.setString(3, cliente.getPass());
+            ps.setString(4, cliente.getGenero());
+            ps.setString(5, cliente.getTelefono());
+            ps.setString(6, cliente.getCorreo());
+            ps.setString(7, cliente.getEstrato());
+            ps.setString(8, cliente.getEdad());
+            ps.setString(9, cliente.getLugarResidencia());
+            ps.setString(10, cliente.getFechaRegistro());
+            ps.setString(11, cliente.getCiudad());
+            ps.setString(12, cliente.getLocalidad());
+            ps.setInt(13, cliente.getTipoUser());
+
+            ps.executeUpdate();
+
+            return true;
+
+        } catch (SQLException ex) {
+            System.err.println("Error en el insert: " + ex);
+            return false;
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                System.err.println("Erro en cierre conexion : " + ex);
+            }
+        }
+
+    }
+
+    public List mostrarTodosDatos() {
+
+        con = getConnection();
+
+        List<Cliente> datos = new ArrayList<>();
+
+        try {
+
+            ps = (PreparedStatement) con.prepareStatement("select cl.idCliente, ca.nombreCategoria, cl.nombreCliente, cl.apellido, cl.password, cl.genero, cl.telefono, cl.correoE, cl.estrato, cl.edad, cl.lugarResidencia, cl.fechaRegistro, cl.ciudad, cl.localidad  from cliente as cl inner join categoria as ca on cl.idCategoria = ca.idCategoria ");
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Cliente cliente = new Cliente();
+
+                cliente.setId(rs.getInt("cl.idCliente"));
+                cliente.setNombreCategoria(rs.getString("ca.nombreCategoria"));
+                cliente.setNombre(rs.getString("cl.nombreCliente"));
+                cliente.setApellido(rs.getString("cl.apellido"));
+                cliente.setPass(rs.getString("cl.password"));
+                cliente.setGenero(rs.getString("cl.genero"));
+                cliente.setTelefono(rs.getString("cl.telefono"));
+                cliente.setCorreo(rs.getString("cl.correoE"));
+                cliente.setEstrato(rs.getString("cl.estrato"));
+                cliente.setEdad(rs.getString("cl.edad"));
+                cliente.setLugarResidencia(rs.getString("cl.lugarResidencia"));
+                cliente.setFechaRegistro(rs.getString("cl.fechaRegistro"));
+                cliente.setCiudad(rs.getString("cl.ciudad"));
+                cliente.setLocalidad(rs.getString("cl.localidad"));
+
+                datos.add(cliente);
+
+            }
+            return datos;
+
+        } catch (SQLException ex) {
+            System.err.println("Error mostrar datos: " + ex);
+        }
+        return null;
+
+    }
+
+    public boolean deleteClientes(int id) {
+
+        con = getConnection();
+
+        try {
+            ps = (PreparedStatement) con.prepareStatement("delete from cliente where idCliente = ?");
+            ps.setInt(1, id);
+
+            ps.executeUpdate();
+
+            return true;
+
+        } catch (SQLException ex) {
+            System.err.println("Error delete ");
+        }
+
+        return false;
+
+    }
+
+    public boolean updateDatos(Cliente cliente) {
+
+        con = getConnection();
+        try {
+            ps = (PreparedStatement) con.prepareStatement("update cliente set nombreCliente=?, apellido=?, password=?, genero=?, telefono=?, correoE=?,   estrato=?, edad=?, lugarResidencia=?, fechaRegistro=?, ciudad=?, localidad=?, idCategoria=? where idCliente=? ");
+            ps.setString(1, cliente.getNombre());
+            ps.setString(2, cliente.getApellido());
+            ps.setString(3, cliente.getPass());
+            ps.setString(4, cliente.getGenero());
+            ps.setString(5, cliente.getTelefono());
+            ps.setString(6, cliente.getCorreo());
+            ps.setString(7, cliente.getEstrato());
+            ps.setString(8, cliente.getEdad());
+            ps.setString(9, cliente.getLugarResidencia());
+            ps.setString(10, cliente.getFechaRegistro());
+            ps.setString(11, cliente.getCiudad());
+            ps.setString(12, cliente.getLocalidad());
+            ps.setInt(13, cliente.getTipoUser());
+            ps.setInt(14, cliente.getId());
+
+            ps.executeUpdate();
+
+            return true;
+
+        } catch (SQLException ex) {
+            System.err.println("Error en update: " + ex.getMessage());
+        }
+
+        return false;
+
+    }
+
+    public int validarExitenciaUsuario(String condicion, String dato) {
+
+        con = getConnection();
+        try {
+            ps = (PreparedStatement) con.prepareStatement("select count(idCliente) from cliente where " + condicion + "?");
+            ps.setString(1, dato);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                return rs.getInt(1);
+            }
+         return 1;
+        } catch (SQLException ex) {
+            System.err.println("Error en validar Datos"+ ex); 
+            return 1;
+        }
+            
+
+    }
+
+    public boolean validacionCorreo(String correo) {
+
+        Pattern pattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+        Matcher matcher = pattern.matcher(correo);
+
+        return matcher.find();
+
+    }
+    
+     public boolean inicioSesion(Cliente usuario) {
+
+        con = getConnection();
+
+        try {
+            ps = (PreparedStatement) con.prepareStatement("select * from cliente where nombreCliente =? and password = ?");
+            ps.setString(1, usuario.getNombre());
+            ps.setString(2, usuario.getPass());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+
+                ps = (PreparedStatement) con.prepareStatement("update cliente set fechaRegistro=? where idCliente=?");
+                ps.setString(1, usuario.getFechaRegistro());
+                ps.setInt(2, rs.getInt("idCliente"));
+
+                ps.executeUpdate();
+
+                
+                usuario.setId(rs.getInt("idCliente"));
+                usuario.setNombre(rs.getString("nombreCliente"));
+                usuario.setTipoUser(rs.getInt("idCategoria"));
+                usuario.setFechaRegistro(rs.getString("fechaRegistro"));
+               
+                return true;
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Error en inicio sesion" + ex);
+            return false;
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                System.err.println("cierre cnexio BBDD" + ex);
+            }
+        }
+        return false;
+
+    }
+
+}
