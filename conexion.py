@@ -1,15 +1,7 @@
-package modeloCliente;
 
-import com.mysql.jdbc.Connection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
-/**
- *
- * @author braya
- */
+
+
 public class Conexion {
     
     public static final String url= "jdbc:mysql://localhost:3306/programacompleto?autoreconnect=true&useSSL=false";
